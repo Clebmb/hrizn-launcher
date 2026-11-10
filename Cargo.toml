@@ -1,0 +1,34 @@
+# The launcher's own workspace. `launcher/` keeps its own workspace (as it always has), and the
+# crates below are its path dependencies, copied with it so this folder builds on its own.
+[workspace]
+exclude = ["launcher"]
+members = [
+    "crates/horizon-bench",
+    "crates/horizon-core",
+    "crates/horizon-cosmetics",
+    "crates/horizon-friends",
+    "crates/horizon-mcp",
+    "crates/horizon-mod-api-gen",
+    "crates/horizon-mod-api-gen/dispatch-tests",
+    "crates/horizon-mods",
+    "crates/horizon-port-pack",
+    "crates/horizon-prepare",
+    "crates/horizon-protocol",
+    "crates/horizon-release-sign",
+    "crates/horizon-shader-api",
+    "crates/horizon-telemetry",
+    "crates/horizon-theme",
+    "crates/horizon-world",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+rust-version = "1.85"
+
+[workspace.lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
+needless_range_loop = "allow"
+large_enum_variant = "allow"
