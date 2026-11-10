@@ -58,32 +58,32 @@ pub const PLATFORMS: [(&str, &str, &str, &str); 5] = [
         "linux",
         "x86_64",
         "horizon-linux-x86_64.tar.gz",
-        "horizon-launcher-linux-x86_64.tar.gz",
+        "hrizn-launcher-linux-x86_64.tar.gz",
     ),
     (
         "macos",
         "aarch64",
         "horizon-macos-arm64.zip",
-        "horizon-launcher-macos-arm64.zip",
+        "hrizn-launcher-macos-arm64.zip",
     ),
     // Intel Macs (#1161).
     (
         "macos",
         "x86_64",
         "horizon-macos-x64.zip",
-        "horizon-launcher-macos-x64.zip",
+        "hrizn-launcher-macos-x64.zip",
     ),
     (
         "windows",
         "x86_64",
         "horizon-windows-x64.zip",
-        "horizon-launcher-windows-x64.zip",
+        "hrizn-launcher-windows-x64.zip",
     ),
     (
         "windows",
         "aarch64",
         "horizon-windows-arm64.zip",
-        "horizon-launcher-windows-arm64.zip",
+        "hrizn-launcher-windows-arm64.zip",
     ),
 ];
 
@@ -119,7 +119,7 @@ const fn platform_assets(os: &str, arch: &str) -> Option<(&'static str, &'static
 /// Both follow this launcher's own architecture. An x64 launcher on a Windows ARM64 PC (under
 /// emulation) keeps updating itself, installing games and building native mods as x64, so a player
 /// whose emulated setup works is never moved to an ARM64 build by an update. The ARM64 launcher is
-/// what `horizon-launcher-setup-arm64.exe` installs.
+/// what `hrizn-launcher-setup-arm64.exe` installs.
 const OWN_ASSETS: Option<(&str, &str)> =
     platform_assets(std::env::consts::OS, std::env::consts::ARCH);
 /// The game build this launcher installs, None where Horizon has none.
@@ -477,7 +477,7 @@ const fn game_fallback_for(os: &str, arch: &str) -> Option<&'static str> {
 /// one file. A launcher running from one updates by replacing that file ([`appimage_path`]), so it
 /// needs this archive rather than the platform's `.tar.gz`.
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
-pub const LAUNCHER_APPIMAGE_ASSET: Option<&str> = Some("horizon-launcher-linux-x86_64.AppImage");
+pub const LAUNCHER_APPIMAGE_ASSET: Option<&str> = Some("hrizn-launcher-linux-x86_64.AppImage");
 #[cfg(not(all(target_os = "linux", target_arch = "x86_64")))]
 pub const LAUNCHER_APPIMAGE_ASSET: Option<&str> = None;
 
@@ -4796,25 +4796,25 @@ pub fn {f}("
             platform_assets("macos", "aarch64"),
             Some((
                 "horizon-macos-arm64.zip",
-                "horizon-launcher-macos-arm64.zip"
+                "hrizn-launcher-macos-arm64.zip"
             ))
         );
         assert_eq!(
             platform_assets("macos", "x86_64"),
-            Some(("horizon-macos-x64.zip", "horizon-launcher-macos-x64.zip"))
+            Some(("horizon-macos-x64.zip", "hrizn-launcher-macos-x64.zip"))
         );
         assert_eq!(
             platform_assets("windows", "x86_64"),
             Some((
                 "horizon-windows-x64.zip",
-                "horizon-launcher-windows-x64.zip"
+                "hrizn-launcher-windows-x64.zip"
             ))
         );
         assert_eq!(
             platform_assets("windows", "aarch64"),
             Some((
                 "horizon-windows-arm64.zip",
-                "horizon-launcher-windows-arm64.zip"
+                "hrizn-launcher-windows-arm64.zip"
             ))
         );
         assert_eq!(platform_assets("linux", "aarch64"), None);
@@ -5095,8 +5095,8 @@ pub fn {f}("
     #[test]
     fn an_arm64_launcher_skips_a_release_without_its_zip() {
         let (arm, x64) = (
-            "horizon-launcher-windows-arm64.zip",
-            "horizon-launcher-windows-x64.zip",
+            "hrizn-launcher-windows-arm64.zip",
+            "hrizn-launcher-windows-x64.zip",
         );
         let asset = |name: &str| serde_json::json!({"name": name, "browser_download_url": format!("https://example.test/{name}"), "size": 1});
         let list = serde_json::json!([
@@ -5131,8 +5131,12 @@ pub fn {f}("
                 named == 2 || (optional && named > 2),
                 "nightly-build.yml must sign and publish {game} ({os} {arch})"
             );
+            // HRIZN's fork publishes the launcher under its own name (`hrizn-launcher-`); the
+            // workflow the repository builds from still names Horizon's (`horizon-launcher-`).
+            let horizon_name = launcher_asset.replacen("hrizn-launcher-", "horizon-launcher-", 1);
             assert!(
-                launcher.contains(&format!("asset: {launcher_asset}")),
+                launcher.contains(&format!("asset: {launcher_asset}"))
+                    || launcher.contains(&format!("asset: {horizon_name}")),
                 "launcher.yml builds no {launcher_asset}"
             );
         }

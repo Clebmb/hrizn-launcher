@@ -1,6 +1,6 @@
 //! Per-user setup on Windows, no administrator needed.
 //!
-//! `horizon-launcher-setup.exe` (the launcher's own binary under another name, made by the
+//! `hrizn-launcher-setup.exe` (the launcher's own binary under another name, made by the
 //! release workflow) copies itself to `%LOCALAPPDATA%\Programs\Hrizn Launcher\horizon-launcher.exe`,
 //! makes the Start menu shortcut (and the desktop one if asked) and the Uninstall entry under HKCU,
 //! and starts the installed copy. `horizon-launcher.exe uninstall` takes it all away again: the
@@ -10,7 +10,7 @@
 //! "Hrizn Launcher" ([`folder_for`]) and is removed with `remove_dir`, which only takes an empty one.
 //!
 //! Command lines (handled in `main` before the CLI parser, so MCP never sees them):
-//! `horizon-launcher-setup.exe` (window), `... setup --quiet [--dir <folder>] [--desktop-shortcut]`,
+//! `hrizn-launcher-setup.exe` (window), `... setup --quiet [--dir <folder>] [--desktop-shortcut]`,
 //! `horizon-launcher.exe uninstall` (window), `... uninstall --quiet [--remove-data]`.
 use crate::backend;
 use crate::shortcut;
@@ -78,9 +78,10 @@ fn args() -> Vec<String> {
     std::env::args().skip(1).collect()
 }
 
-/// Whether this binary is the setup: its file name starts with `horizon-launcher-setup` (the
-/// release workflow copies the launcher under that name). `HORIZON_LAUNCHER_SETUP=1` forces it,
-/// for screenshots and tests.
+/// Whether this binary is the setup: its file name starts with `hrizn-launcher-setup`, or with
+/// `horizon-launcher-setup` (the name Horizon's launcher used before this fork). The release
+/// publishes the launcher's own binary under that name. `HORIZON_LAUNCHER_SETUP=1` forces it, for
+/// screenshots and tests.
 pub fn is_setup_exe() -> bool {
     if std::env::var_os("HORIZON_LAUNCHER_SETUP").is_some_and(|v| v.to_string_lossy() == "1") {
         return true;
@@ -88,7 +89,10 @@ pub fn is_setup_exe() -> bool {
     backend::exe_path()
         .file_stem()
         .and_then(|s| s.to_str())
-        .is_some_and(|s| s.to_ascii_lowercase().starts_with("horizon-launcher-setup"))
+        .is_some_and(|s| {
+            let s = s.to_ascii_lowercase();
+            s.starts_with("hrizn-launcher-setup") || s.starts_with("horizon-launcher-setup")
+        })
 }
 
 /// The window to open instead of the launcher: the wizard for the setup exe started without
